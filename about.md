@@ -2,7 +2,7 @@
 title: "About Me"
 ---
 
-![Portrait of Dallin Jacobs](images/headshot.jpg)
+![Portrait of Dallin Jacobs](headshot.jpg)
 
 ## Introduction
 I am a Computer Science student at Brigham Young University with an emphasis in Machine Learning. My academic interests center on applied and theoretical machine learning research, particularly in computer vision, large language models, and AI evaluation. My long-term goal is to pursue a PhD in Machine Learning and remain at the cutting edge of ML research and development.
