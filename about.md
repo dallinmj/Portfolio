@@ -2,47 +2,53 @@
 title: "About Me"
 ---
 
-## Background
+![Portrait of Dallin Jacobs](images/headshot.jpg)
 
-Write a brief introduction about yourself here. Include:
+## Introduction
+I am a Computer Science student at Brigham Young University with an emphasis in Machine Learning. My academic interests center on applied and theoretical machine learning research, particularly in computer vision, large language models, and AI evaluation. My long-term goal is to pursue a PhD in Machine Learning and remain at the cutting edge of ML research and development.
 
-- Your academic background
-- Your interest in data science
-- Your career goals
-- Any relevant experience or projects
+In the short term, I aim to publish at least one research paper this year while continuing hands-on research across multiple domains.
 
 ## Education
+**Brigham Young University (BYU)** — Provo, UT  
+Bachelor of Science in Computer Science (Machine Learning Emphasis)  
+Expected Graduation: **May 2027**  
+GPA: **4.0**
 
-- **[Your Degree]** - [University Name], [Year]
-- **Relevant Coursework**: Statistics, Data Analysis, Programming, etc.
+Relevant Coursework:
+- Advanced Machine Learning  
+- Deep Learning  
+- Transformers for NLP  
+- Large Language Model Research  
 
-## Skills & Interests
+## Experience
+**Research Assistant — Computer Vision & Record Linking Lab (BYU)**  
+- Work on computer vision pipelines to process historical census records with complex handwriting.
+- Support large-scale data extraction used to expand family history and genealogical records for FamilySearch.
 
-### Technical Skills
-- **Programming**: Python
-- **Data Analysis**: Pandas, NumPy
-- **Visualization**: Matplotlib, Seaborn
-- **Machine Learning**: Scikit-learn
-- **Tools**: Jupyter Notebooks, Git/GitHub
+**Research Assistant — Faith Benchmark Project (BYU)**  
+- Develop evaluation benchmarks to analyze how AI conversations influence and represent different faiths and religions.
+- Study model behavior, bias, and downstream societal impact of AI-generated religious dialogue.
 
-### Areas of Interest
-- [Your specific interests, e.g., environmental data, healthcare analytics, finance, etc.]
-- [Other areas you're curious about]
+**AI & Software Engineer — Red Compass Health**  
+- Designed and built an AI-powered clinical charting pipeline that generates SOAP notes and treatment plans, saving providers significant time daily.
+- Implemented HIPAA-compliant databases and retrieval-augmented generation (RAG) systems grounded in medical documentation.
 
-## Goals
+**Software Engineer — White Pine Financial**  
+- Developed and maintained Python-based automation tools for investment management workflows.
+- Improved system reliability, performance, and code quality across production tools.
 
-Describe what you hope to achieve through your data science journey:
+## Skills
+- **Programming Languages**: Python, Java, C++, SQL  
+- **Machine Learning**: PyTorch, Hugging Face, Transformers, LLM fine-tuning, embeddings, RAG  
+- **Data & Tools**: Git/GitHub, Tableau, relational databases, infrastructure automation  
+- **Languages**: Fluent in Spanish (reading, writing, speaking)
 
-- Short-term learning objectives
-- Long-term career aspirations
-- Types of problems you want to solve
+## Get to Know Me
+- I love sports, especially BYU athletics, and enjoy ultimate frisbee and soccer.
+- I value time with my family!
+- I enjoy meeting new people!
 
 ## Contact
-
-- **Email**: your.email@example.com
-- **GitHub**: [github.com/your-username](https://github.com/your-username)
-- **LinkedIn**: [linkedin.com/in/your-profile](https://linkedin.com/in/your-profile)
-
----
-
-*This portfolio showcases my learning progress and projects completed during my data science studies.*
+- **Email**: dallinmjacobs@gmail.com  
+- **LinkedIn**: [linkedin.com/in/dallin-jacobs-byu](https://www.linkedin.com/in/dallin-jacobs-byu)
