@@ -76,7 +76,7 @@
     "href": "about.html#education",
     "title": "About Me",
     "section": "Education",
-    "text": "Education\n\n[Your Degree] - [University Name], [Year]\nRelevant Coursework: Statistics, Data Analysis, Programming, etc."
+    "text": "Education\n\nComputer Science (Machine Learning) - Brigham Young University, 2027 (projected)\nRelevant Coursework: Statistics, Data Analysis, Programming, etc."
   },
   {
     "objectID": "about.html#skills-interests",
@@ -97,7 +97,7 @@
     "href": "about.html#contact",
     "title": "About Me",
     "section": "Contact",
-    "text": "Contact\n\nEmail: your.email@example.com\nGitHub: github.com/your-username\nLinkedIn: linkedin.com/in/your-profile\n\n\nThis portfolio showcases my learning progress and projects completed during my data science studies."
+    "text": "Contact\n\nEmail: dallinmjacobs@gmail.com\nGitHub: github.com/your-username\nLinkedIn: linkedin.com/in/dallin-jacobs\n\n\nThis portfolio showcases my learning progress and projects completed during my data science studies."
   },
   {
     "objectID": "projects/data-acquisition.html",

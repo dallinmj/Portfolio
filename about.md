@@ -13,7 +13,7 @@ Write a brief introduction about yourself here. Include:
 
 ## Education
 
-- **[Your Degree]** - [University Name], [Year]
+- **Computer Science (Machine Learning)** - Brigham Young University, 2027 (projected)
 - **Relevant Coursework**: Statistics, Data Analysis, Programming, etc.
 
 ## Skills & Interests
@@ -39,9 +39,9 @@ Describe what you hope to achieve through your data science journey:
 
 ## Contact
 
-- **Email**: your.email@example.com
+- **Email**: dallinmjacobs@gmail.com
 - **GitHub**: [github.com/your-username](https://github.com/your-username)
-- **LinkedIn**: [linkedin.com/in/your-profile](https://linkedin.com/in/your-profile)
+- **LinkedIn**: [linkedin.com/in/dallin-jacobs](https://www.linkedin.com/in/dallin-jacobs-byu/)
 
 ---
 
