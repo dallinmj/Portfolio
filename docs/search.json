@@ -1,33 +1,5 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Welcome to My Data Science Portfolio",
-    "section": "",
-    "text": "Welcome to my data science portfolio! This site shows my journey learning data science and analytics. Here you’ll find projects that demonstrate what I’ve learned and discovered.\n\n\nThis portfolio shows my work learning data science. Each project includes:\n\nMy code with documentation\nVisualizations I created\nWhat I learned and discovered\n\nI built this site using Quarto and host it on GitHub Pages.\n\n\n\n\nProgramming: Python, Pandas for data analysis\nVisualization: Creating charts with Matplotlib and Seaborn\nData Collection: Getting data from files, websites, and APIs\nAnalysis: Finding patterns and answering questions with data\n\n\n\n\n\n\n\nLearn how I explore datasets to find interesting patterns and answer questions.\n\n\n\nSee how I gather data from different sources and prepare it for analysis.\n\n\n\nSee how I tackle a data science project beginning to end.\n\n\n\nThanks for visiting! Feel free to explore my projects and see what I’m learning."
-  },
-  {
-    "objectID": "index.html#about-this-portfolio",
-    "href": "index.html#about-this-portfolio",
-    "title": "Welcome to My Data Science Portfolio",
-    "section": "",
-    "text": "This portfolio shows my work learning data science. Each project includes:\n\nMy code with documentation\nVisualizations I created\nWhat I learned and discovered\n\nI built this site using Quarto and host it on GitHub Pages."
-  },
-  {
-    "objectID": "index.html#skills-im-learning",
-    "href": "index.html#skills-im-learning",
-    "title": "Welcome to My Data Science Portfolio",
-    "section": "",
-    "text": "Programming: Python, Pandas for data analysis\nVisualization: Creating charts with Matplotlib and Seaborn\nData Collection: Getting data from files, websites, and APIs\nAnalysis: Finding patterns and answering questions with data"
-  },
-  {
-    "objectID": "index.html#my-projects",
-    "href": "index.html#my-projects",
-    "title": "Welcome to My Data Science Portfolio",
-    "section": "",
-    "text": "Learn how I explore datasets to find interesting patterns and answer questions.\n\n\n\nSee how I gather data from different sources and prepare it for analysis.\n\n\n\nSee how I tackle a data science project beginning to end.\n\n\n\nThanks for visiting! Feel free to explore my projects and see what I’m learning."
-  },
-  {
     "objectID": "projects/index.html",
     "href": "projects/index.html",
     "title": "Projects Overview",
@@ -58,46 +30,74 @@
     ]
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About Me",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to My Data Science Portfolio",
     "section": "",
-    "text": "Write a brief introduction about yourself here. Include:\n\nYour academic background\nYour interest in data science\nYour career goals\nAny relevant experience or projects"
+    "text": "Welcome to my data science portfolio! This site shows my journey learning data science and analytics. Here you’ll find projects that demonstrate what I’ve learned and discovered.\n\n\nThis portfolio shows my work learning data science. Each project includes:\n\nMy code with documentation\nVisualizations I created\nWhat I learned and discovered\n\nI built this site using Quarto and host it on GitHub Pages.\n\n\n\n\nProgramming: Python, Pandas for data analysis\nVisualization: Creating charts with Matplotlib and Seaborn\nData Collection: Getting data from files, websites, and APIs\nAnalysis: Finding patterns and answering questions with data\n\n\n\n\n\n\n\nLearn how I explore datasets to find interesting patterns and answer questions.\n\n\n\nSee how I gather data from different sources and prepare it for analysis.\n\n\n\nSee how I tackle a data science project beginning to end.\n\n\n\nThanks for visiting! Feel free to explore my projects and see what I’m learning."
   },
   {
-    "objectID": "about.html#background",
-    "href": "about.html#background",
-    "title": "About Me",
+    "objectID": "index.html#about-this-portfolio",
+    "href": "index.html#about-this-portfolio",
+    "title": "Welcome to My Data Science Portfolio",
     "section": "",
-    "text": "Write a brief introduction about yourself here. Include:\n\nYour academic background\nYour interest in data science\nYour career goals\nAny relevant experience or projects"
+    "text": "This portfolio shows my work learning data science. Each project includes:\n\nMy code with documentation\nVisualizations I created\nWhat I learned and discovered\n\nI built this site using Quarto and host it on GitHub Pages."
+  },
+  {
+    "objectID": "index.html#skills-im-learning",
+    "href": "index.html#skills-im-learning",
+    "title": "Welcome to My Data Science Portfolio",
+    "section": "",
+    "text": "Programming: Python, Pandas for data analysis\nVisualization: Creating charts with Matplotlib and Seaborn\nData Collection: Getting data from files, websites, and APIs\nAnalysis: Finding patterns and answering questions with data"
+  },
+  {
+    "objectID": "index.html#my-projects",
+    "href": "index.html#my-projects",
+    "title": "Welcome to My Data Science Portfolio",
+    "section": "",
+    "text": "Learn how I explore datasets to find interesting patterns and answer questions.\n\n\n\nSee how I gather data from different sources and prepare it for analysis.\n\n\n\nSee how I tackle a data science project beginning to end.\n\n\n\nThanks for visiting! Feel free to explore my projects and see what I’m learning."
+  },
+  {
+    "objectID": "about.html#introduction",
+    "href": "about.html#introduction",
+    "title": "About Me",
+    "section": "Introduction",
+    "text": "Introduction\nI am a Computer Science student at Brigham Young University with an emphasis in Machine Learning. My academic interests center on applied and theoretical machine learning research, particularly in computer vision, large language models, and AI evaluation. My long-term goal is to pursue a PhD in Machine Learning and remain at the cutting edge of ML research and development.\nIn the short term, I aim to publish at least one research paper this year while continuing hands-on research across multiple domains."
   },
   {
     "objectID": "about.html#education",
     "href": "about.html#education",
     "title": "About Me",
     "section": "Education",
-    "text": "Education\n\nComputer Science (Machine Learning) - Brigham Young University, 2027 (projected)\nRelevant Coursework: Statistics, Data Analysis, Programming, etc."
+    "text": "Education\nBrigham Young University (BYU) — Provo, UT\nBachelor of Science in Computer Science (Machine Learning Emphasis)\nExpected Graduation: May 2027\nGPA: 4.0\nRelevant Coursework: - Advanced Machine Learning\n- Deep Learning\n- Transformers for NLP\n- Large Language Model Research"
   },
   {
-    "objectID": "about.html#skills-interests",
-    "href": "about.html#skills-interests",
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
     "title": "About Me",
-    "section": "Skills & Interests",
-    "text": "Skills & Interests\n\nTechnical Skills\n\nProgramming: Python\nData Analysis: Pandas, NumPy\nVisualization: Matplotlib, Seaborn\nMachine Learning: Scikit-learn\nTools: Jupyter Notebooks, Git/GitHub\n\n\n\nAreas of Interest\n\n[Your specific interests, e.g., environmental data, healthcare analytics, finance, etc.]\n[Other areas you’re curious about]"
+    "section": "Experience",
+    "text": "Experience\nResearch Assistant — Computer Vision & Record Linking Lab (BYU)\n- Work on computer vision pipelines to process historical census records with complex handwriting. - Support large-scale data extraction used to expand family history and genealogical records for FamilySearch.\nResearch Assistant — Faith Benchmark Project (BYU)\n- Develop evaluation benchmarks to analyze how AI conversations influence and represent different faiths and religions. - Study model behavior, bias, and downstream societal impact of AI-generated religious dialogue.\nAI & Software Engineer — Red Compass Health\n- Designed and built an AI-powered clinical charting pipeline that generates SOAP notes and treatment plans, saving providers significant time daily. - Implemented HIPAA-compliant databases and retrieval-augmented generation (RAG) systems grounded in medical documentation.\nSoftware Engineer — White Pine Financial\n- Developed and maintained Python-based automation tools for investment management workflows. - Improved system reliability, performance, and code quality across production tools."
   },
   {
-    "objectID": "about.html#goals",
-    "href": "about.html#goals",
+    "objectID": "about.html#skills",
+    "href": "about.html#skills",
     "title": "About Me",
-    "section": "Goals",
-    "text": "Goals\nDescribe what you hope to achieve through your data science journey:\n\nShort-term learning objectives\nLong-term career aspirations\nTypes of problems you want to solve"
+    "section": "Skills",
+    "text": "Skills\n\nProgramming Languages: Python, Java, C++, SQL\n\nMachine Learning: PyTorch, Hugging Face, Transformers, LLM fine-tuning, embeddings, RAG\n\nData & Tools: Git/GitHub, Tableau, relational databases, infrastructure automation\n\nLanguages: Fluent in Spanish (reading, writing, speaking)"
+  },
+  {
+    "objectID": "about.html#get-to-know-me",
+    "href": "about.html#get-to-know-me",
+    "title": "About Me",
+    "section": "Get to Know Me",
+    "text": "Get to Know Me\n\nI love sports, especially BYU athletics, and enjoy ultimate frisbee and soccer.\nI value time with my family!\nI enjoy meeting new people!"
   },
   {
     "objectID": "about.html#contact",
     "href": "about.html#contact",
     "title": "About Me",
     "section": "Contact",
-    "text": "Contact\n\nEmail: dallinmjacobs@gmail.com\nGitHub: github.com/your-username\nLinkedIn: linkedin.com/in/dallin-jacobs\n\n\nThis portfolio showcases my learning progress and projects completed during my data science studies."
+    "text": "Contact\n\nEmail: dallinmjacobs@gmail.com\n\nLinkedIn: linkedin.com/in/dallin-jacobs-byu"
   },
   {
     "objectID": "projects/data-acquisition.html",
