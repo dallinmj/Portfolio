@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Dallin Jacobs">
+<meta name="dcterms.date" content="2026-02-20">
 
-<title>Blog – Your Name - Data Science Portfolio</title>
+<title>Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit – Your Name - Data Science Portfolio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -184,22 +186,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-run-open-source-llms-instead-of-just-using-an-api" id="toc-why-run-open-source-llms-instead-of-just-using-an-api" class="nav-link active" data-scroll-target="#why-run-open-source-llms-instead-of-just-using-an-api">Why run open-source LLMs instead of just using an API?</a></li>
+  <li><a href="#why-gpus-beat-cpus-for-llms" id="toc-why-gpus-beat-cpus-for-llms" class="nav-link" data-scroll-target="#why-gpus-beat-cpus-for-llms">Why GPUs beat CPUs for LLMs</a>
+  <ul class="collapse">
+  <li><a href="#a-simple-mental-model" id="toc-a-simple-mental-model" class="nav-link" data-scroll-target="#a-simple-mental-model">A simple mental model</a></li>
+  </ul></li>
+  <li><a href="#where-to-get-models-and-the-types-youll-see" id="toc-where-to-get-models-and-the-types-youll-see" class="nav-link" data-scroll-target="#where-to-get-models-and-the-types-youll-see">Where to get models (and the types you’ll see)</a>
+  <ul class="collapse">
+  <li><a href="#common-model-types" id="toc-common-model-types" class="nav-link" data-scroll-target="#common-model-types">Common model “types”</a></li>
+  </ul></li>
+  <li><a href="#model-sizes-why-bigger-isnt-always-better" id="toc-model-sizes-why-bigger-isnt-always-better" class="nav-link" data-scroll-target="#model-sizes-why-bigger-isnt-always-better">Model sizes: why bigger isn’t always better</a></li>
+  <li><a href="#vram-basics-what-actually-uses-gpu-memory" id="toc-vram-basics-what-actually-uses-gpu-memory" class="nav-link" data-scroll-target="#vram-basics-what-actually-uses-gpu-memory">VRAM basics: what actually uses GPU memory?</a>
+  <ul class="collapse">
+  <li><a href="#model-weights-the-big-constant-chunk" id="toc-model-weights-the-big-constant-chunk" class="nav-link" data-scroll-target="#model-weights-the-big-constant-chunk">1) Model weights (the big, constant chunk)</a></li>
+  <li><a href="#kv-cache-the-context-length-tax" id="toc-kv-cache-the-context-length-tax" class="nav-link" data-scroll-target="#kv-cache-the-context-length-tax">2) KV cache (the “context length tax”)</a></li>
+  <li><a href="#runtime-overhead-the-stuff-around-the-model" id="toc-runtime-overhead-the-stuff-around-the-model" class="nav-link" data-scroll-target="#runtime-overhead-the-stuff-around-the-model">3) Runtime overhead (the “stuff around the model”)</a></li>
+  <li><a href="#estimating-weight-memory-quick-math" id="toc-estimating-weight-memory-quick-math" class="nav-link" data-scroll-target="#estimating-weight-memory-quick-math">Estimating weight memory (quick math)</a></li>
+  <li><a href="#kv-cache-why-context-length-and-batching-matter" id="toc-kv-cache-why-context-length-and-batching-matter" class="nav-link" data-scroll-target="#kv-cache-why-context-length-and-batching-matter">KV cache: why context length and batching matter</a></li>
+  </ul></li>
+  <li><a href="#practical-vram-estimates-for-inference-weights-only-baseline" id="toc-practical-vram-estimates-for-inference-weights-only-baseline" class="nav-link" data-scroll-target="#practical-vram-estimates-for-inference-weights-only-baseline">Practical VRAM estimates for inference (weights-only baseline)</a></li>
+  <li><a href="#loading-time-disk-ram-vram-why-startup-can-feel-slow" id="toc-loading-time-disk-ram-vram-why-startup-can-feel-slow" class="nav-link" data-scroll-target="#loading-time-disk-ram-vram-why-startup-can-feel-slow">Loading time: disk → RAM → VRAM (why startup can feel slow)</a>
+  <ul class="collapse">
+  <li><a href="#super-simple-ways-to-speed-this-up-avoid-pain" id="toc-super-simple-ways-to-speed-this-up-avoid-pain" class="nav-link" data-scroll-target="#super-simple-ways-to-speed-this-up-avoid-pain">Super simple ways to speed this up / avoid pain</a></li>
+  </ul></li>
+  <li><a href="#minimal-example-run-inference-on-gpu-with-transformers" id="toc-minimal-example-run-inference-on-gpu-with-transformers" class="nav-link" data-scroll-target="#minimal-example-run-inference-on-gpu-with-transformers">Minimal example: run inference on GPU with Transformers</a></li>
+  <li><a href="#making-models-fit-on-smaller-gpus" id="toc-making-models-fit-on-smaller-gpus" class="nav-link" data-scroll-target="#making-models-fit-on-smaller-gpus">Making models fit on smaller GPUs</a></li>
+  <li><a href="#conclusion-what-to-do-next" id="toc-conclusion-what-to-do-next" class="nav-link" data-scroll-target="#conclusion-what-to-do-next">Conclusion + what to do next</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Blog</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Dallin Jacobs </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 20, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -209,10 +254,357 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>Open-source LLMs (like <a href="https://huggingface.co/meta-llama">Llama</a>, <a href="https://huggingface.co/mistralai">Mistral</a>, <a href="https://huggingface.co/Qwen">Qwen</a>, etc.) can run on your own hardware or cloud GPUs. This post is a practical guide to <em>why</em> you’d do that, <em>how</em> it works, and <em>how to estimate the GPU memory (VRAM) you’ll need</em>.</p>
+<section id="why-run-open-source-llms-instead-of-just-using-an-api" class="level2">
+<h2 class="anchored" data-anchor-id="why-run-open-source-llms-instead-of-just-using-an-api">Why run open-source LLMs instead of just using an API?</h2>
+<p>Using ChatGPT or a hosted API is convenient, but running your own model can be worth it when you care about:</p>
+<ul>
+<li><strong>Privacy / compliance</strong>: you keep prompts and data within your environment.</li>
+<li><strong>Cost predictability</strong>: heavy usage can get expensive with per-token pricing.</li>
+<li><strong>Latency control</strong>: local inference (generating text) can be faster and more consistent.</li>
+<li><strong>Customization</strong>: you can fine-tune or adapt models (e.g., <a href="https://www.ibm.com/think/topics/lora">LoRA</a>) for your domain.</li>
+<li><strong>Reproducibility</strong>: you can pin a model version and run the same workflow long-term.</li>
+</ul>
+<p>If your use case is occasional Q&amp;A or classification, APIs are still the easiest option. But if you’re building a system, doing research, or working with sensitive data, local/cloud GPUs are often a better fit.</p>
+</section>
+<section id="why-gpus-beat-cpus-for-llms" class="level2">
+<h2 class="anchored" data-anchor-id="why-gpus-beat-cpus-for-llms">Why GPUs beat CPUs for LLMs</h2>
+<p>LLMs spend most of their time doing <strong>large amounts of matrix multiplication</strong>. GPUs are built for <em>tons of parallel math at once</em>, while CPUs are built to be great at a wide variety of tasks (but not nearly as many parallel math operations).</p>
+<p>In practice:</p>
+<ul>
+<li><strong>CPU inference</strong> can work for smaller models, but it’s almost always much slower.</li>
+<li><strong>GPU inference</strong> is the standard approach because it’s dramatically faster.</li>
+</ul>
+<section id="a-simple-mental-model" class="level3">
+<h3 class="anchored" data-anchor-id="a-simple-mental-model">A simple mental model</h3>
+<ul>
+<li><strong>Compute</strong>: GPUs can do many more math operations at the same time.</li>
+<li><strong>Bandwidth</strong>: GPUs can move data around inside VRAM very quickly (this matters constantly during inference).</li>
+<li><strong>Memory (VRAM)</strong>: VRAM is limited, so “does the model fit?” is often the main constraint.</li>
+</ul>
+</section>
+</section>
+<section id="where-to-get-models-and-the-types-youll-see" class="level2">
+<h2 class="anchored" data-anchor-id="where-to-get-models-and-the-types-youll-see">Where to get models (and the types you’ll see)</h2>
+<p>The most common distribution hub is <strong>Hugging Face</strong>, which hosts model weights and other needed information.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="better_huggingface.png" class="img-fluid figure-img"></p>
+<figcaption>Hugging Face logo</figcaption>
+</figure>
+</div>
+<p>Useful starting points:</p>
+<ul>
+<li><a href="https://huggingface.co/models">Hugging Face Models</a> (search + filters)</li>
+<li><a href="https://huggingface.co/docs/transformers/index">Transformers documentation</a> (loading and running models)</li>
+</ul>
+<section id="common-model-types" class="level3">
+<h3 class="anchored" data-anchor-id="common-model-types">Common model “types”</h3>
+<p>You’ll usually see variations like:</p>
+<ul>
+<li><strong>Base</strong> models: raw pre-trained models (not specifically trained to chat).</li>
+<li><strong>Instruct / Chat</strong> models: fine-tuned to follow instructions and have conversations.</li>
+<li><strong>Code</strong> models: tuned for programming tasks.</li>
+<li><strong>Vision-language</strong> models: accept images + text.</li>
+<li>and many others.</li>
+</ul>
+<p>For most people trying to run an LLM, <strong>instruct/chat</strong> is the most immediately useful.</p>
+</section>
+</section>
+<section id="model-sizes-why-bigger-isnt-always-better" class="level2">
+<h2 class="anchored" data-anchor-id="model-sizes-why-bigger-isnt-always-better">Model sizes: why bigger isn’t always better</h2>
+<p>Model size is often described by how many <strong>parameters</strong> a model has (think: how many stored adjustable numbers the model learned during training). You’ll see names like <strong>7B</strong>, <strong>13B</strong>, <strong>70B</strong> where <strong>B</strong> means “billion parameters.”</p>
+<ul>
+<li><strong>Larger models</strong> tend to be more capable (better reasoning, more knowledge, more robust answers).</li>
+<li><strong>Smaller models</strong> are cheaper and faster and can be “good enough” for many tasks.</li>
+</ul>
+<p>A practical way to choose:</p>
+<ul>
+<li>Start with <strong>7B–8B</strong> for local experimentation.</li>
+<li>Move to <strong>13B–34B</strong> when you want noticeably better quality and have more VRAM.</li>
+<li>Use <strong>70B+</strong> when you have access to powerful GPUs and need a substantial quality increase.</li>
+</ul>
+</section>
+<section id="vram-basics-what-actually-uses-gpu-memory" class="level2">
+<h2 class="anchored" data-anchor-id="vram-basics-what-actually-uses-gpu-memory">VRAM basics: what actually uses GPU memory?</h2>
+<p>During inference (generating text), VRAM is mainly consumed by:</p>
+<ol type="1">
+<li><strong>Model weights</strong> (the learned parameters — the “brain” stored as numbers)</li>
+<li><strong>KV cache</strong> (the model’s short-term memory while it’s reading your prompt and generating)</li>
+<li><strong>Runtime overhead</strong> (extra temporary memory used by the GPU/software to run efficiently)</li>
+</ol>
+<section id="model-weights-the-big-constant-chunk" class="level3">
+<h3 class="anchored" data-anchor-id="model-weights-the-big-constant-chunk">1) Model weights (the big, constant chunk)</h3>
+<p>This is usually the largest and most predictable part. If your weights don’t fit, nothing runs.</p>
+</section>
+<section id="kv-cache-the-context-length-tax" class="level3">
+<h3 class="anchored" data-anchor-id="kv-cache-the-context-length-tax">2) KV cache (the “context length tax”)</h3>
+<p>When the model reads your prompt and generates new tokens, it stores some intermediate information so it doesn’t have to “re-think” the entire prompt from scratch every single token. That saved information is the <strong>KV cache</strong>.</p>
+<p><strong>Key point:</strong> KV cache grows as your conversation gets longer.</p>
+<p>So:</p>
+<ul>
+<li>Short prompt → small KV cache → lower VRAM usage</li>
+<li>Long prompt / long chat history → big KV cache → higher VRAM usage</li>
+</ul>
+</section>
+<section id="runtime-overhead-the-stuff-around-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="runtime-overhead-the-stuff-around-the-model">3) Runtime overhead (the “stuff around the model”)</h3>
+<p>Even if the weights fit perfectly, the system still needs VRAM for things like:</p>
+<ul>
+<li>temporary work buffers (space for fast math)</li>
+<li>token buffers and bookkeeping</li>
+</ul>
+<p>You don’t usually manage this directly — you just budget some extra VRAM for it.</p>
+</section>
+<section id="estimating-weight-memory-quick-math" class="level3">
+<h3 class="anchored" data-anchor-id="estimating-weight-memory-quick-math">Estimating weight memory (quick math)</h3>
+<p>A rough estimate for weight storage is:</p>
+<p><strong>Weight memory (GB) ≈ (parameters × bytes_per_parameter) / 1e9</strong></p>
+<p>Or if you want the more “computer-ish” version:</p>
+<p><strong>Weight memory (GiB) ≈ (parameters × bytes_per_parameter) / (1024³)</strong></p>
+<p>Typical bytes per parameter (depending on precision):</p>
+<ul>
+<li>FP32: 4 bytes</li>
+<li>FP16 / BF16: 2 bytes</li>
+<li>INT8: 1 byte</li>
+<li>4-bit: 0.5 bytes</li>
+</ul>
+<p><strong>Rule of thumb:</strong> after you estimate the weights, add <strong>~10–20% extra</strong> for runtime overhead.</p>
+<p><strong>Example (very rough):</strong> A 7B model in FP16:</p>
+<ul>
+<li>weights ≈ 7,000,000,000 × 2 bytes ≈ 14 GB</li>
+<li>plus overhead → ~16–18 GB total (typical)</li>
+</ul>
+</section>
+<section id="kv-cache-why-context-length-and-batching-matter" class="level3">
+<h3 class="anchored" data-anchor-id="kv-cache-why-context-length-and-batching-matter">KV cache: why context length and batching matter</h3>
+<p>KV cache grows with:</p>
+<ul>
+<li><strong>Context length</strong>: how many tokens are in the prompt + generated output.</li>
+<li><strong>Batch size</strong>: how many requests you’re running at once.</li>
+</ul>
+<section id="batch-size" class="level4">
+<h4 class="anchored" data-anchor-id="batch-size">Batch size</h4>
+<p>Batch size is basically: “how many prompts am I processing at the same time?”</p>
+<ul>
+<li>If you’re chatting with one model instance interactively, batch size is usually <strong>1</strong>.</li>
+<li>If you’re serving multiple users or processing a pile of prompts at once, batch size might be <strong>8, 16, 32</strong>, etc.</li>
+</ul>
+<p>Higher batch size improves throughput (more total tokens/second across users), but it increases VRAM usage.</p>
+</section>
+<section id="model-architecture-details-simplified" class="level4">
+<h4 class="anchored" data-anchor-id="model-architecture-details-simplified">“Model architecture details” (simplified)</h4>
+<p>Different models have different internal shapes (like how wide the layers are and how many layers there are). Bigger models usually have:</p>
+<ul>
+<li>more layers</li>
+<li>wider layers</li>
+</ul>
+<p>That tends to increase KV cache size too. You don’t need to memorize the math here — just know that <strong>bigger models usually pay a bigger KV cache cost</strong> at the same context length.</p>
+<p><strong>This is why a model can “fit” for short prompts but crash with out-of-memory errors on long prompts.</strong></p>
+</section>
+</section>
+</section>
+<section id="practical-vram-estimates-for-inference-weights-only-baseline" class="level2">
+<h2 class="anchored" data-anchor-id="practical-vram-estimates-for-inference-weights-only-baseline">Practical VRAM estimates for inference (weights-only baseline)</h2>
+<p>These estimates are <strong>weights + typical overhead</strong> (not worst-case KV cache). Real usage depends on context length and batching, but this gets you in the right ballpark.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 32%">
+<col style="width: 25%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Model Size</th>
+<th style="text-align: right;">FP16/BF16 (≈2 bytes/param)</th>
+<th style="text-align: right;">INT8 (≈1 byte/param)</th>
+<th style="text-align: right;">4-bit (≈0.5 bytes/param)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">7B</td>
+<td style="text-align: right;">~16–18 GB</td>
+<td style="text-align: right;">~9–10 GB</td>
+<td style="text-align: right;">~5–6 GB</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">13B</td>
+<td style="text-align: right;">~28–32 GB</td>
+<td style="text-align: right;">~15–18 GB</td>
+<td style="text-align: right;">~8–10 GB</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">34B</td>
+<td style="text-align: right;">~70–80 GB</td>
+<td style="text-align: right;">~40–45 GB</td>
+<td style="text-align: right;">~20–24 GB</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">70B</td>
+<td style="text-align: right;">~140–160 GB</td>
+<td style="text-align: right;">~80–90 GB</td>
+<td style="text-align: right;">~38–45 GB</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation:</strong></p>
+<ul>
+<li>A single <strong>24 GB</strong> GPU can often run <strong>7B–13B</strong> comfortably (with INT8 or 4-bit).</li>
+<li><strong>70B</strong> typically needs <strong>multi-GPU</strong>, or strong quantization + careful settings.</li>
+</ul>
+</section>
+<section id="loading-time-disk-ram-vram-why-startup-can-feel-slow" class="level2">
+<h2 class="anchored" data-anchor-id="loading-time-disk-ram-vram-why-startup-can-feel-slow">Loading time: disk → RAM → VRAM (why startup can feel slow)</h2>
+<p>When you “load a model,” data often moves through stages:</p>
+<ol type="1">
+<li><strong>Disk → CPU RAM</strong> (reading weight files from storage)</li>
+<li><strong>CPU RAM → GPU VRAM</strong> (copying weights onto the GPU)</li>
+</ol>
+<p>This can feel slow for big models because you might be moving <strong>tens or hundreds of gigabytes</strong>.</p>
+<section id="super-simple-ways-to-speed-this-up-avoid-pain" class="level3">
+<h3 class="anchored" data-anchor-id="super-simple-ways-to-speed-this-up-avoid-pain">Super simple ways to speed this up / avoid pain</h3>
+<ul>
+<li><strong>Use an SSD</strong> (huge difference vs hard drives or slow network storage).</li>
+<li><strong>Download once, reuse many times</strong> (keep models cached locally instead of re-downloading).</li>
+<li><strong>Don’t load what you don’t need</strong> (use one model at a time when possible).</li>
+<li><strong>Be patient on the first load</strong> (subsequent loads are often faster if the files are already cached by the OS).</li>
+</ul>
+</section>
+</section>
+<section id="minimal-example-run-inference-on-gpu-with-transformers" class="level2">
+<h2 class="anchored" data-anchor-id="minimal-example-run-inference-on-gpu-with-transformers">Minimal example: run inference on GPU with Transformers</h2>
+<p>You don’t need to memorize code to understand the workflow. Conceptually, running inference looks like this:</p>
+<ol type="1">
+<li>Pick a model ID from Hugging Face.</li>
+<li>Load tokenizer (turns text into tokens).</li>
+<li>Load the model weights onto GPU (or split across devices).</li>
+<li>Send in a prompt.</li>
+<li>Generate tokens until you hit a stop condition (max tokens, end token, etc.).</li>
+</ol>
+<p>If you’re new, the main ideas to keep in mind are almost always:</p>
+<ul>
+<li>VRAM (does it fit?)</li>
+<li>context length (KV cache grows fast)</li>
+<li>loading time (big files)</li>
+</ul>
+</section>
+<section id="making-models-fit-on-smaller-gpus" class="level2">
+<h2 class="anchored" data-anchor-id="making-models-fit-on-smaller-gpus">Making models fit on smaller GPUs</h2>
+<p>Below are common techniques to reduce VRAM usage or improve throughput.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 14%">
+<col style="width: 19%">
+<col style="width: 25%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Technique</th>
+<th>What it does</th>
+<th>Pros</th>
+<th>Cons</th>
+<th>Example use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>FP16/BF16</strong></td>
+<td>Half-precision weights</td>
+<td>Good quality, standard on GPUs</td>
+<td>Still large memory</td>
+<td>Default inference for mid-size models</td>
+</tr>
+<tr class="even">
+<td><strong>INT8</strong></td>
+<td>8-bit weights</td>
+<td>Big memory savings</td>
+<td>Sometimes slower / small quality changes</td>
+<td>When FP16 barely doesn’t fit</td>
+</tr>
+<tr class="odd">
+<td><strong>4-bit quantization</strong></td>
+<td>4-bit weights</td>
+<td>Huge VRAM savings</td>
+<td>Quality drop risk; extra complexity</td>
+<td>Fit 13B+ on 24GB GPUs</td>
+</tr>
+<tr class="even">
+<td><strong>Reduce context length</strong></td>
+<td>Smaller KV cache</td>
+<td>Immediate OOM fix</td>
+<td>Less long-context ability</td>
+<td>Chatbots with shorter prompts</td>
+</tr>
+<tr class="odd">
+<td><strong>Lower batch size</strong></td>
+<td>Less KV + overhead</td>
+<td>Easy</td>
+<td>Lower throughput</td>
+<td>Single-user interactive runs</td>
+</tr>
+<tr class="even">
+<td><strong>CPU offload</strong></td>
+<td>Some weights on CPU RAM</td>
+<td>Can run bigger models</td>
+<td>Slower; needs fast CPU↔︎GPU transfer</td>
+<td>When VRAM is the hard limit</td>
+</tr>
+<tr class="odd">
+<td><strong>Multi-GPU parallelism</strong></td>
+<td>Split model across GPUs</td>
+<td>Run very large models</td>
+<td>Setup complexity</td>
+<td>70B+ models</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="conclusion-what-to-do-next" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-what-to-do-next">Conclusion + what to do next</h2>
+<p>Running LLMs yourself is mainly a <strong>hardware + workflow</strong> problem:</p>
+<ul>
+<li>choose a model type (instruct/chat),</li>
+<li>choose a size that matches your VRAM,</li>
+<li>and use techniques like <strong>quantization</strong> when you need to fit bigger models.</li>
+</ul>
+<p><strong>Next steps (CTA):</strong></p>
+<ol type="1">
+<li>Pick a <strong>7B instruct</strong> model from <a href="https://huggingface.co/models">Hugging Face Models</a> and try running it locally or on a cloud GPU.</li>
+<li>Watch VRAM usage with <code>nvidia-smi</code> while generating short vs long outputs (you’ll see the difference in VRAM usage).</li>
+<li>Try <strong>4-bit quantization</strong> and compare (a) VRAM usage, (b) speed, and (c) response quality on the same prompt.</li>
+</ol>
+<p>Here is a quick example to get you started!</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForCausalLM</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) Pick a small instruct model to start</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>model_id <span class="op">=</span> <span class="st">"mistralai/Mistral-7B-Instruct-v0.2"</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) Load tokenizer + model (device_map="auto" puts it on your GPU if available)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_id)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    model_id,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.float16,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) Run a simple prompt</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> <span class="st">"In one paragraph, explain what VRAM is and why it matters for running LLMs."</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer(prompt, return_tensors<span class="op">=</span><span class="st">"pt"</span>).to(model.device)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    output_ids <span class="op">=</span> model.generate(<span class="op">**</span>inputs, max_new_tokens<span class="op">=</span><span class="dv">120</span>, do_sample<span class="op">=</span><span class="va">True</span>, temperature<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer.decode(output_ids[<span class="dv">0</span>], skip_special_tokens<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 <!-- -->
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -666,9 +1058,263 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Blog"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Dallin Jacobs"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> 2026-02-20</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>Open-source LLMs (like <span class="co">[</span><span class="ot">Llama</span><span class="co">](https://huggingface.co/meta-llama)</span>, <span class="co">[</span><span class="ot">Mistral</span><span class="co">](https://huggingface.co/mistralai)</span>, <span class="co">[</span><span class="ot">Qwen</span><span class="co">](https://huggingface.co/Qwen)</span>, etc.) can run on your own hardware or cloud GPUs. This post is a practical guide to *why* you’d do that, *how* it works, and *how to estimate the GPU memory (VRAM) you’ll need*.</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why run open-source LLMs instead of just using an API?</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>Using ChatGPT or a hosted API is convenient, but running your own model can be worth it when you care about:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Privacy / compliance**: you keep prompts and data within your environment.</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Cost predictability**: heavy usage can get expensive with per-token pricing.</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Latency control**: local inference (generating text) can be faster and more consistent.</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Customization**: you can fine-tune or adapt models (e.g., <span class="co">[</span><span class="ot">LoRA</span><span class="co">](https://www.ibm.com/think/topics/lora)</span>) for your domain.</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Reproducibility**: you can pin a model version and run the same workflow long-term.</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>If your use case is occasional Q&amp;A or classification, APIs are still the easiest option. But if you’re building a system, doing research, or working with sensitive data, local/cloud GPUs are often a better fit.</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why GPUs beat CPUs for LLMs</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>LLMs spend most of their time doing **large amounts of matrix multiplication**. GPUs are built for *tons of parallel math at once*, while CPUs are built to be great at a wide variety of tasks (but not nearly as many parallel math operations).</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>In practice:</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**CPU inference** can work for smaller models, but it’s almost always much slower.</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**GPU inference** is the standard approach because it’s dramatically faster.</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### A simple mental model</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Compute**: GPUs can do many more math operations at the same time.</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Bandwidth**: GPUs can move data around inside VRAM very quickly (this matters constantly during inference).</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Memory (VRAM)**: VRAM is limited, so “does the model fit?” is often the main constraint.</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where to get models (and the types you’ll see)</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>The most common distribution hub is **Hugging Face**, which hosts model weights and other needed information.</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="al">![Hugging Face logo](better_huggingface.png)</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>Useful starting points:</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Hugging Face Models</span><span class="co">](https://huggingface.co/models)</span> (search + filters)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Transformers documentation</span><span class="co">](https://huggingface.co/docs/transformers/index)</span> (loading and running models)</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="fu">### Common model “types”</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>You’ll usually see variations like:</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Base** models: raw pre-trained models (not specifically trained to chat).</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Instruct / Chat** models: fine-tuned to follow instructions and have conversations.</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Code** models: tuned for programming tasks.</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Vision-language** models: accept images + text.</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>and many others.</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>For most people trying to run an LLM, **instruct/chat** is the most immediately useful.</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Model sizes: why bigger isn’t always better</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>Model size is often described by how many **parameters** a model has (think: how many stored adjustable numbers the model learned during training). You’ll see names like **7B**, **13B**, **70B** where **B** means “billion parameters.”</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Larger models** tend to be more capable (better reasoning, more knowledge, more robust answers).</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Smaller models** are cheaper and faster and can be “good enough” for many tasks.</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>A practical way to choose:</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Start with **7B–8B** for local experimentation.</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Move to **13B–34B** when you want noticeably better quality and have more VRAM.</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Use **70B+** when you have access to powerful GPUs and need a substantial quality increase.</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="fu">## VRAM basics: what actually uses GPU memory?</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>During inference (generating text), VRAM is mainly consumed by:</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Model weights** (the learned parameters — the “brain” stored as numbers)</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**KV cache** (the model’s short-term memory while it’s reading your prompt and generating)</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Runtime overhead** (extra temporary memory used by the GPU/software to run efficiently)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="fu">### 1) Model weights (the big, constant chunk)</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>This is usually the largest and most predictable part. If your weights don’t fit, nothing runs.</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="fu">### 2) KV cache (the “context length tax”)</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>When the model reads your prompt and generates new tokens, it stores some intermediate information so it doesn’t have to “re-think” the entire prompt from scratch every single token. That saved information is the **KV cache**.</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>**Key point:** KV cache grows as your conversation gets longer.</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>So:</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Short prompt → small KV cache → lower VRAM usage</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>Long prompt / long chat history → big KV cache → higher VRAM usage</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="fu">### 3) Runtime overhead (the “stuff around the model”)</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>Even if the weights fit perfectly, the system still needs VRAM for things like:</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>temporary work buffers (space for fast math)</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>token buffers and bookkeeping</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>You don’t usually manage this directly — you just budget some extra VRAM for it.</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="fu">### Estimating weight memory (quick math)</span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>A rough estimate for weight storage is:</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>**Weight memory (GB) ≈ (parameters × bytes_per_parameter) / 1e9**</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>Or if you want the more “computer-ish” version:</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>**Weight memory (GiB) ≈ (parameters × bytes_per_parameter) / (1024³)**</span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a>Typical bytes per parameter (depending on precision):</span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>FP32: 4 bytes</span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>FP16 / BF16: 2 bytes</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>INT8: 1 byte</span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>4-bit: 0.5 bytes</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>**Rule of thumb:** after you estimate the weights, add **~10–20% extra** for runtime overhead.</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>**Example (very rough):**</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>A 7B model in FP16:</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>weights ≈ 7,000,000,000 × 2 bytes ≈ 14 GB</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>plus overhead → ~16–18 GB total (typical)</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="fu">### KV cache: why context length and batching matter</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a>KV cache grows with:</span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Context length**: how many tokens are in the prompt + generated output.</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Batch size**: how many requests you’re running at once.</span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Batch size</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>Batch size is basically: “how many prompts am I processing at the same time?”</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If you’re chatting with one model instance interactively, batch size is usually **1**.</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>If you’re serving multiple users or processing a pile of prompts at once, batch size might be **8, 16, 32**, etc.</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>Higher batch size improves throughput (more total tokens/second across users), but it increases VRAM usage.</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a><span class="fu">#### “Model architecture details” (simplified)</span></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>Different models have different internal shapes (like how wide the layers are and how many layers there are). Bigger models usually have:</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>more layers</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>wider layers</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>That tends to increase KV cache size too. You don’t need to memorize the math here — just know that **bigger models usually pay a bigger KV cache cost** at the same context length.</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>**This is why a model can “fit” for short prompts but crash with out-of-memory errors on long prompts.**</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a><span class="fu">## Practical VRAM estimates for inference (weights-only baseline)</span></span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>These estimates are **weights + typical overhead** (not worst-case KV cache). Real usage depends on context length and batching, but this gets you in the right ballpark.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Model Size <span class="pp">|</span> FP16/BF16 (≈2 bytes/param) <span class="pp">|</span> INT8 (≈1 byte/param) <span class="pp">|</span> 4-bit (≈0.5 bytes/param) <span class="pp">|</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="pp">| ---------:</span> <span class="pp">| -------------------------:</span> <span class="pp">| -------------------:</span> <span class="pp">| -----------------------:</span> <span class="pp">|</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>         7B <span class="pp">|</span>                  ~16–18 GB <span class="pp">|</span>             ~9–10 GB <span class="pp">|</span>                  ~5–6 GB <span class="pp">|</span></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>        13B <span class="pp">|</span>                  ~28–32 GB <span class="pp">|</span>            ~15–18 GB <span class="pp">|</span>                 ~8–10 GB <span class="pp">|</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>        34B <span class="pp">|</span>                  ~70–80 GB <span class="pp">|</span>            ~40–45 GB <span class="pp">|</span>                ~20–24 GB <span class="pp">|</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>        70B <span class="pp">|</span>                ~140–160 GB <span class="pp">|</span>            ~80–90 GB <span class="pp">|</span>                ~38–45 GB <span class="pp">|</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>**Interpretation:**</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>A single **24 GB** GPU can often run **7B–13B** comfortably (with INT8 or 4-bit).</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**70B** typically needs **multi-GPU**, or strong quantization + careful settings.</span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a><span class="fu">## Loading time: disk → RAM → VRAM (why startup can feel slow)</span></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>When you “load a model,” data often moves through stages:</span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Disk → CPU RAM** (reading weight files from storage)</span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**CPU RAM → GPU VRAM** (copying weights onto the GPU)</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a>This can feel slow for big models because you might be moving **tens or hundreds of gigabytes**.</span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="fu">### Super simple ways to speed this up / avoid pain</span></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Use an SSD** (huge difference vs hard drives or slow network storage).</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Download once, reuse many times** (keep models cached locally instead of re-downloading).</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Don’t load what you don’t need** (use one model at a time when possible).</span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Be patient on the first load** (subsequent loads are often faster if the files are already cached by the OS).</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="fu">## Minimal example: run inference on GPU with Transformers</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>You don’t need to memorize code to understand the workflow. Conceptually, running inference looks like this:</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Pick a model ID from Hugging Face.</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Load tokenizer (turns text into tokens).</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Load the model weights onto GPU (or split across devices).</span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Send in a prompt.</span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Generate tokens until you hit a stop condition (max tokens, end token, etc.).</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>If you’re new, the main ideas to keep in mind are almost always:</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>VRAM (does it fit?)</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>context length (KV cache grows fast)</span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>loading time (big files)</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="fu">## Making models fit on smaller GPUs</span></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>Below are common techniques to reduce VRAM usage or improve throughput.</span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Technique                 <span class="pp">|</span> What it does            <span class="pp">|</span> Pros                           <span class="pp">|</span> Cons                                     <span class="pp">|</span> Example use                           <span class="pp">|</span></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="pp">| -------------------------</span> <span class="pp">| -----------------------</span> <span class="pp">| ------------------------------</span> <span class="pp">| ----------------------------------------</span> <span class="pp">| -------------------------------------</span> <span class="pp">|</span></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **FP16/BF16**             <span class="pp">|</span> Half-precision weights  <span class="pp">|</span> Good quality, standard on GPUs <span class="pp">|</span> Still large memory                       <span class="pp">|</span> Default inference for mid-size models <span class="pp">|</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **INT8**                  <span class="pp">|</span> 8-bit weights           <span class="pp">|</span> Big memory savings             <span class="pp">|</span> Sometimes slower / small quality changes <span class="pp">|</span> When FP16 barely doesn’t fit          <span class="pp">|</span></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **4-bit quantization**    <span class="pp">|</span> 4-bit weights           <span class="pp">|</span> Huge VRAM savings              <span class="pp">|</span> Quality drop risk; extra complexity      <span class="pp">|</span> Fit 13B+ on 24GB GPUs                 <span class="pp">|</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Reduce context length** <span class="pp">|</span> Smaller KV cache        <span class="pp">|</span> Immediate OOM fix              <span class="pp">|</span> Less long-context ability                <span class="pp">|</span> Chatbots with shorter prompts         <span class="pp">|</span></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Lower batch size**      <span class="pp">|</span> Less KV + overhead      <span class="pp">|</span> Easy                           <span class="pp">|</span> Lower throughput                         <span class="pp">|</span> Single-user interactive runs          <span class="pp">|</span></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **CPU offload**           <span class="pp">|</span> Some weights on CPU RAM <span class="pp">|</span> Can run bigger models          <span class="pp">|</span> Slower; needs fast CPU↔GPU transfer      <span class="pp">|</span> When VRAM is the hard limit           <span class="pp">|</span></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Multi-GPU parallelism** <span class="pp">|</span> Split model across GPUs <span class="pp">|</span> Run very large models          <span class="pp">|</span> Setup complexity                         <span class="pp">|</span> 70B+ models                           <span class="pp">|</span></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusion + what to do next</span></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>Running LLMs yourself is mainly a **hardware + workflow** problem:</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>choose a model type (instruct/chat),</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>choose a size that matches your VRAM,</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>and use techniques like **quantization** when you need to fit bigger models.</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>**Next steps (CTA):**</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Pick a **7B instruct** model from <span class="co">[</span><span class="ot">Hugging Face Models</span><span class="co">](https://huggingface.co/models)</span> and try running it locally or on a cloud GPU.</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Watch VRAM usage with <span class="in">`nvidia-smi`</span> while generating short vs long outputs (you’ll see the difference in VRAM usage).</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Try **4-bit quantization** and compare (a) VRAM usage, (b) speed, and (c) response quality on the same prompt.</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>Here is a quick example to get you started!</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForCausalLM</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) Pick a small instruct model to start</span></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>model_id <span class="op">=</span> <span class="st">"mistralai/Mistral-7B-Instruct-v0.2"</span></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) Load tokenizer + model (device_map="auto" puts it on your GPU if available)</span></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_id)</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>    model_id,</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.float16,</span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) Run a simple prompt</span></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> <span class="st">"In one paragraph, explain what VRAM is and why it matters for running LLMs."</span></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer(prompt, return_tensors<span class="op">=</span><span class="st">"pt"</span>).to(model.device)</span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>    output_ids <span class="op">=</span> model.generate(<span class="op">**</span>inputs, max_new_tokens<span class="op">=</span><span class="dv">120</span>, do_sample<span class="op">=</span><span class="va">True</span>, temperature<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer.decode(output_ids[<span class="dv">0</span>], skip_special_tokens<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

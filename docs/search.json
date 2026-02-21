@@ -100,6 +100,83 @@
     "text": "Contact\n\nEmail: dallinmjacobs@gmail.com\n\nLinkedIn: linkedin.com/in/dallin-jacobs-byu"
   },
   {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "",
+    "text": "Open-source LLMs (like Llama, Mistral, Qwen, etc.) can run on your own hardware or cloud GPUs. This post is a practical guide to why you’d do that, how it works, and how to estimate the GPU memory (VRAM) you’ll need."
+  },
+  {
+    "objectID": "blog.html#why-run-open-source-llms-instead-of-just-using-an-api",
+    "href": "blog.html#why-run-open-source-llms-instead-of-just-using-an-api",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Why run open-source LLMs instead of just using an API?",
+    "text": "Why run open-source LLMs instead of just using an API?\nUsing ChatGPT or a hosted API is convenient, but running your own model can be worth it when you care about:\n\nPrivacy / compliance: you keep prompts and data within your environment.\nCost predictability: heavy usage can get expensive with per-token pricing.\nLatency control: local inference (generating text) can be faster and more consistent.\nCustomization: you can fine-tune or adapt models (e.g., LoRA) for your domain.\nReproducibility: you can pin a model version and run the same workflow long-term.\n\nIf your use case is occasional Q&A or classification, APIs are still the easiest option. But if you’re building a system, doing research, or working with sensitive data, local/cloud GPUs are often a better fit."
+  },
+  {
+    "objectID": "blog.html#why-gpus-beat-cpus-for-llms",
+    "href": "blog.html#why-gpus-beat-cpus-for-llms",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Why GPUs beat CPUs for LLMs",
+    "text": "Why GPUs beat CPUs for LLMs\nLLMs spend most of their time doing large amounts of matrix multiplication. GPUs are built for tons of parallel math at once, while CPUs are built to be great at a wide variety of tasks (but not nearly as many parallel math operations).\nIn practice:\n\nCPU inference can work for smaller models, but it’s almost always much slower.\nGPU inference is the standard approach because it’s dramatically faster.\n\n\nA simple mental model\n\nCompute: GPUs can do many more math operations at the same time.\nBandwidth: GPUs can move data around inside VRAM very quickly (this matters constantly during inference).\nMemory (VRAM): VRAM is limited, so “does the model fit?” is often the main constraint."
+  },
+  {
+    "objectID": "blog.html#where-to-get-models-and-the-types-youll-see",
+    "href": "blog.html#where-to-get-models-and-the-types-youll-see",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Where to get models (and the types you’ll see)",
+    "text": "Where to get models (and the types you’ll see)\nThe most common distribution hub is Hugging Face, which hosts model weights and other needed information.\n\n\n\nHugging Face logo\n\n\nUseful starting points:\n\nHugging Face Models (search + filters)\nTransformers documentation (loading and running models)\n\n\nCommon model “types”\nYou’ll usually see variations like:\n\nBase models: raw pre-trained models (not specifically trained to chat).\nInstruct / Chat models: fine-tuned to follow instructions and have conversations.\nCode models: tuned for programming tasks.\nVision-language models: accept images + text.\nand many others.\n\nFor most people trying to run an LLM, instruct/chat is the most immediately useful."
+  },
+  {
+    "objectID": "blog.html#model-sizes-why-bigger-isnt-always-better",
+    "href": "blog.html#model-sizes-why-bigger-isnt-always-better",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Model sizes: why bigger isn’t always better",
+    "text": "Model sizes: why bigger isn’t always better\nModel size is often described by how many parameters a model has (think: how many stored adjustable numbers the model learned during training). You’ll see names like 7B, 13B, 70B where B means “billion parameters.”\n\nLarger models tend to be more capable (better reasoning, more knowledge, more robust answers).\nSmaller models are cheaper and faster and can be “good enough” for many tasks.\n\nA practical way to choose:\n\nStart with 7B–8B for local experimentation.\nMove to 13B–34B when you want noticeably better quality and have more VRAM.\nUse 70B+ when you have access to powerful GPUs and need a substantial quality increase."
+  },
+  {
+    "objectID": "blog.html#vram-basics-what-actually-uses-gpu-memory",
+    "href": "blog.html#vram-basics-what-actually-uses-gpu-memory",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "VRAM basics: what actually uses GPU memory?",
+    "text": "VRAM basics: what actually uses GPU memory?\nDuring inference (generating text), VRAM is mainly consumed by:\n\nModel weights (the learned parameters — the “brain” stored as numbers)\nKV cache (the model’s short-term memory while it’s reading your prompt and generating)\nRuntime overhead (extra temporary memory used by the GPU/software to run efficiently)\n\n\n1) Model weights (the big, constant chunk)\nThis is usually the largest and most predictable part. If your weights don’t fit, nothing runs.\n\n\n2) KV cache (the “context length tax”)\nWhen the model reads your prompt and generates new tokens, it stores some intermediate information so it doesn’t have to “re-think” the entire prompt from scratch every single token. That saved information is the KV cache.\nKey point: KV cache grows as your conversation gets longer.\nSo:\n\nShort prompt → small KV cache → lower VRAM usage\nLong prompt / long chat history → big KV cache → higher VRAM usage\n\n\n\n3) Runtime overhead (the “stuff around the model”)\nEven if the weights fit perfectly, the system still needs VRAM for things like:\n\ntemporary work buffers (space for fast math)\ntoken buffers and bookkeeping\n\nYou don’t usually manage this directly — you just budget some extra VRAM for it.\n\n\nEstimating weight memory (quick math)\nA rough estimate for weight storage is:\nWeight memory (GB) ≈ (parameters × bytes_per_parameter) / 1e9\nOr if you want the more “computer-ish” version:\nWeight memory (GiB) ≈ (parameters × bytes_per_parameter) / (1024³)\nTypical bytes per parameter (depending on precision):\n\nFP32: 4 bytes\nFP16 / BF16: 2 bytes\nINT8: 1 byte\n4-bit: 0.5 bytes\n\nRule of thumb: after you estimate the weights, add ~10–20% extra for runtime overhead.\nExample (very rough): A 7B model in FP16:\n\nweights ≈ 7,000,000,000 × 2 bytes ≈ 14 GB\nplus overhead → ~16–18 GB total (typical)\n\n\n\nKV cache: why context length and batching matter\nKV cache grows with:\n\nContext length: how many tokens are in the prompt + generated output.\nBatch size: how many requests you’re running at once.\n\n\nBatch size\nBatch size is basically: “how many prompts am I processing at the same time?”\n\nIf you’re chatting with one model instance interactively, batch size is usually 1.\nIf you’re serving multiple users or processing a pile of prompts at once, batch size might be 8, 16, 32, etc.\n\nHigher batch size improves throughput (more total tokens/second across users), but it increases VRAM usage.\n\n\n“Model architecture details” (simplified)\nDifferent models have different internal shapes (like how wide the layers are and how many layers there are). Bigger models usually have:\n\nmore layers\nwider layers\n\nThat tends to increase KV cache size too. You don’t need to memorize the math here — just know that bigger models usually pay a bigger KV cache cost at the same context length.\nThis is why a model can “fit” for short prompts but crash with out-of-memory errors on long prompts."
+  },
+  {
+    "objectID": "blog.html#practical-vram-estimates-for-inference-weights-only-baseline",
+    "href": "blog.html#practical-vram-estimates-for-inference-weights-only-baseline",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Practical VRAM estimates for inference (weights-only baseline)",
+    "text": "Practical VRAM estimates for inference (weights-only baseline)\nThese estimates are weights + typical overhead (not worst-case KV cache). Real usage depends on context length and batching, but this gets you in the right ballpark.\n\n\n\n\n\n\n\n\n\nModel Size\nFP16/BF16 (≈2 bytes/param)\nINT8 (≈1 byte/param)\n4-bit (≈0.5 bytes/param)\n\n\n\n\n7B\n~16–18 GB\n~9–10 GB\n~5–6 GB\n\n\n13B\n~28–32 GB\n~15–18 GB\n~8–10 GB\n\n\n34B\n~70–80 GB\n~40–45 GB\n~20–24 GB\n\n\n70B\n~140–160 GB\n~80–90 GB\n~38–45 GB\n\n\n\nInterpretation:\n\nA single 24 GB GPU can often run 7B–13B comfortably (with INT8 or 4-bit).\n70B typically needs multi-GPU, or strong quantization + careful settings."
+  },
+  {
+    "objectID": "blog.html#loading-time-disk-ram-vram-why-startup-can-feel-slow",
+    "href": "blog.html#loading-time-disk-ram-vram-why-startup-can-feel-slow",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Loading time: disk → RAM → VRAM (why startup can feel slow)",
+    "text": "Loading time: disk → RAM → VRAM (why startup can feel slow)\nWhen you “load a model,” data often moves through stages:\n\nDisk → CPU RAM (reading weight files from storage)\nCPU RAM → GPU VRAM (copying weights onto the GPU)\n\nThis can feel slow for big models because you might be moving tens or hundreds of gigabytes.\n\nSuper simple ways to speed this up / avoid pain\n\nUse an SSD (huge difference vs hard drives or slow network storage).\nDownload once, reuse many times (keep models cached locally instead of re-downloading).\nDon’t load what you don’t need (use one model at a time when possible).\nBe patient on the first load (subsequent loads are often faster if the files are already cached by the OS)."
+  },
+  {
+    "objectID": "blog.html#minimal-example-run-inference-on-gpu-with-transformers",
+    "href": "blog.html#minimal-example-run-inference-on-gpu-with-transformers",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Minimal example: run inference on GPU with Transformers",
+    "text": "Minimal example: run inference on GPU with Transformers\nYou don’t need to memorize code to understand the workflow. Conceptually, running inference looks like this:\n\nPick a model ID from Hugging Face.\nLoad tokenizer (turns text into tokens).\nLoad the model weights onto GPU (or split across devices).\nSend in a prompt.\nGenerate tokens until you hit a stop condition (max tokens, end token, etc.).\n\nIf you’re new, the main ideas to keep in mind are almost always:\n\nVRAM (does it fit?)\ncontext length (KV cache grows fast)\nloading time (big files)"
+  },
+  {
+    "objectID": "blog.html#making-models-fit-on-smaller-gpus",
+    "href": "blog.html#making-models-fit-on-smaller-gpus",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Making models fit on smaller GPUs",
+    "text": "Making models fit on smaller GPUs\nBelow are common techniques to reduce VRAM usage or improve throughput.\n\n\n\n\n\n\n\n\n\n\nTechnique\nWhat it does\nPros\nCons\nExample use\n\n\n\n\nFP16/BF16\nHalf-precision weights\nGood quality, standard on GPUs\nStill large memory\nDefault inference for mid-size models\n\n\nINT8\n8-bit weights\nBig memory savings\nSometimes slower / small quality changes\nWhen FP16 barely doesn’t fit\n\n\n4-bit quantization\n4-bit weights\nHuge VRAM savings\nQuality drop risk; extra complexity\nFit 13B+ on 24GB GPUs\n\n\nReduce context length\nSmaller KV cache\nImmediate OOM fix\nLess long-context ability\nChatbots with shorter prompts\n\n\nLower batch size\nLess KV + overhead\nEasy\nLower throughput\nSingle-user interactive runs\n\n\nCPU offload\nSome weights on CPU RAM\nCan run bigger models\nSlower; needs fast CPU↔︎GPU transfer\nWhen VRAM is the hard limit\n\n\nMulti-GPU parallelism\nSplit model across GPUs\nRun very large models\nSetup complexity\n70B+ models"
+  },
+  {
+    "objectID": "blog.html#conclusion-what-to-do-next",
+    "href": "blog.html#conclusion-what-to-do-next",
+    "title": "Running Large Language Models (LLMs): GPUs, VRAM, and Making Big Models Fit",
+    "section": "Conclusion + what to do next",
+    "text": "Conclusion + what to do next\nRunning LLMs yourself is mainly a hardware + workflow problem:\n\nchoose a model type (instruct/chat),\nchoose a size that matches your VRAM,\nand use techniques like quantization when you need to fit bigger models.\n\nNext steps (CTA):\n\nPick a 7B instruct model from Hugging Face Models and try running it locally or on a cloud GPU.\nWatch VRAM usage with nvidia-smi while generating short vs long outputs (you’ll see the difference in VRAM usage).\nTry 4-bit quantization and compare (a) VRAM usage, (b) speed, and (c) response quality on the same prompt.\n\nHere is a quick example to get you started!\nfrom transformers import AutoTokenizer, AutoModelForCausalLM\nimport torch\n\n# 1) Pick a small instruct model to start\nmodel_id = \"mistralai/Mistral-7B-Instruct-v0.2\"\n\n# 2) Load tokenizer + model (device_map=\"auto\" puts it on your GPU if available)\ntokenizer = AutoTokenizer.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(\n    model_id,\n    torch_dtype=torch.float16,\n    device_map=\"auto\",\n)\n\n# 3) Run a simple prompt\nprompt = \"In one paragraph, explain what VRAM is and why it matters for running LLMs.\"\ninputs = tokenizer(prompt, return_tensors=\"pt\").to(model.device)\n\nwith torch.no_grad():\n    output_ids = model.generate(**inputs, max_new_tokens=120, do_sample=True, temperature=0.7)\n\nprint(tokenizer.decode(output_ids[0], skip_special_tokens=True))"
+  },
+  {
     "objectID": "projects/data-acquisition.html",
     "href": "projects/data-acquisition.html",
     "title": "Data Acquisition Project",
