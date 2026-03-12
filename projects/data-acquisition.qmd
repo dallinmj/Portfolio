@@ -221,10 +221,6 @@ Future analysis could incorporate move sets, abilities, or type effectiveness.
 
 This project demonstrates how publicly available APIs can be used to build interesting datasets for exploratory analysis. By collecting and analyzing Pokémon battle statistics, we were able to identify patterns in stat relationships, type differences, and overall strength.
 
-Beyond Pokémon, the same workflow—using APIs, cleaning JSON data, and exploring relationships—can be applied to many real-world datasets.
-
-For students learning data science, projects like this provide a fun way to practice data acquisition, cleaning, and visualization while exploring patterns in complex systems.
-
 ---
 
 ## Resources
