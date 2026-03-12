@@ -181,7 +181,157 @@
     "href": "projects/data-acquisition.html",
     "title": "Data Acquisition Project",
     "section": "",
-    "text": "This is coming down the pipeline. Check again later.",
+    "text": "Pokémon battles are built around a variety of stats such as HP, attack, defense, and speed. While experienced players often talk about certain Pokémon being “tanky,” “fast,” or “high damage,” it is not always clear how these characteristics appear across the entire set of Pokémon. With over 1000 Pokémon available in the modern Pokédex, this dataset provides an interesting opportunity to explore patterns in their battle statistics.\nIn this project, I collected Pokémon data using a public API and explored how battle stats relate to one another and how they differ across Pokémon types. The goal is to identify patterns that might help explain how Pokémon are designed and how players might think about building a strong team.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#introduction",
+    "href": "projects/data-acquisition.html#introduction",
+    "title": "Data Acquisition Project",
+    "section": "",
+    "text": "Pokémon battles are built around a variety of stats such as HP, attack, defense, and speed. While experienced players often talk about certain Pokémon being “tanky,” “fast,” or “high damage,” it is not always clear how these characteristics appear across the entire set of Pokémon. With over 1000 Pokémon available in the modern Pokédex, this dataset provides an interesting opportunity to explore patterns in their battle statistics.\nIn this project, I collected Pokémon data using a public API and explored how battle stats relate to one another and how they differ across Pokémon types. The goal is to identify patterns that might help explain how Pokémon are designed and how players might think about building a strong team.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#motivating-questions",
+    "href": "projects/data-acquisition.html#motivating-questions",
+    "title": "Data Acquisition Project",
+    "section": "Motivating Questions",
+    "text": "Motivating Questions\nThis analysis focuses on a few key questions:\n\nHow are Pokémon battle stats related to one another?\nDo larger Pokémon tend to be stronger?\nAre certain Pokémon types better at specific stats such as attack or speed?\nWhat general patterns might be useful for players thinking about battle strategy?\n\nUnderstanding these patterns can provide insight into how Pokémon roles (such as tanks, fast attackers, or balanced fighters) emerge from their stat distributions.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#data-collection-and-ethics",
+    "href": "projects/data-acquisition.html#data-collection-and-ethics",
+    "title": "Data Acquisition Project",
+    "section": "Data Collection and Ethics",
+    "text": "Data Collection and Ethics\nThe data for this project was collected using the PokéAPI, a free and publicly available API designed for developers and researchers.\nPokéAPI provides structured Pokémon data including physical attributes and battle statistics. Because the API is publicly accessible and designed for educational use, collecting this data is allowed under its terms of service.\nTo ensure good data collection practices:\n\nRequests were made sequentially rather than in parallel.\nA short delay was included between requests to avoid overloading the API.\nNo authentication or private data was required.\n\nMore information about the API can be found at:\nhttps://pokeapi.co/",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#how-the-dataset-was-created",
+    "href": "projects/data-acquisition.html#how-the-dataset-was-created",
+    "title": "Data Acquisition Project",
+    "section": "How the Dataset Was Created",
+    "text": "How the Dataset Was Created\nThe dataset was assembled using a Python script that queried the PokéAPI for each Pokémon entry. The script retrieved key attributes such as size, type, and battle statistics.\nThe general steps were:\n\nLoop through Pokémon IDs using the PokéAPI endpoint\nRequest data for each Pokémon\nExtract relevant fields from the JSON response\nStore the results in a pandas DataFrame\nExport the cleaned dataset as a CSV file\n\nThe full code for this process is available in the project GitHub repository:\nGitHub Repository:\nhttps://github.com/dallinmj/pokemon",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#overview-of-the-dataset",
+    "href": "projects/data-acquisition.html#overview-of-the-dataset",
+    "title": "Data Acquisition Project",
+    "section": "Overview of the Dataset",
+    "text": "Overview of the Dataset\nThe final dataset contains information for 1,024 Pokémon, each with several attributes describing their size and battle capabilities.\n\nDataset dimensions\n\nRows: 1024 Pokémon\n\nColumns: 11 variables\n\n\n\nData dictionary\n\n\n\nVariable\nDescription\n\n\n\n\nid\nPokédex ID\n\n\nname\nPokémon name\n\n\nheight\nPokémon height\n\n\nweight\nPokémon weight\n\n\nprimary_type\nPrimary Pokémon type\n\n\nhp\nHit Points (health)\n\n\nattack\nPhysical attack stat\n\n\ndefense\nPhysical defense stat\n\n\nspecial_attack\nSpecial attack stat\n\n\nspecial_defense\nSpecial defense stat\n\n\nspeed\nSpeed stat\n\n\n\nThese statistics are the base attributes used in Pokémon battles.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#data-cleaning-and-preparation",
+    "href": "projects/data-acquisition.html#data-cleaning-and-preparation",
+    "title": "Data Acquisition Project",
+    "section": "Data Cleaning and Preparation",
+    "text": "Data Cleaning and Preparation\nThe raw API responses were structured JSON objects, so the main cleaning task involved extracting relevant fields and organizing them into a tabular format.\nKey transformations included:\n\nExtracting nested stat values from the API response\nSelecting the Pokémon’s primary type\nConverting the data into a pandas DataFrame\nExporting the final dataset to CSV format\n\nNo missing values were observed for the battle statistics.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#exploring-pokémon-battle-statistics",
+    "href": "projects/data-acquisition.html#exploring-pokémon-battle-statistics",
+    "title": "Data Acquisition Project",
+    "section": "Exploring Pokémon Battle Statistics",
+    "text": "Exploring Pokémon Battle Statistics\nBefore looking at specific relationships, it is useful to examine how battle stats relate to one another overall.\n\nCorrelation Between Battle Stats\n\nThis heatmap shows the correlation between the six main battle statistics.\nMost stat pairs have moderate positive correlations, meaning that stronger Pokémon often have multiple strong attributes rather than excelling in only one area.\nHowever, none of the correlations exceed about 0.5, suggesting that Pokémon are intentionally designed with diverse stat profiles. For example, speed shows almost no relationship with defense, meaning fast Pokémon are not consistently fragile or durable.\nThis diversity allows for different battle roles such as tanks, fast attackers, or balanced Pokémon.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#are-larger-pokémon-stronger",
+    "href": "projects/data-acquisition.html#are-larger-pokémon-stronger",
+    "title": "Data Acquisition Project",
+    "section": "Are Larger Pokémon Stronger?",
+    "text": "Are Larger Pokémon Stronger?\nA common intuition is that larger Pokémon might also be stronger in battle.\n\nThis plot compares Pokémon height with attack stat.\nWhile there is some upward trend, the relationship is fairly weak. Many smaller Pokémon have high attack values, and some very large Pokémon are not especially strong attackers.\nThis suggests that size alone is not a reliable predictor of battle strength.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#speed-vs-weight",
+    "href": "projects/data-acquisition.html#speed-vs-weight",
+    "title": "Data Acquisition Project",
+    "section": "Speed vs Weight",
+    "text": "Speed vs Weight\nAnother interesting question is whether lighter Pokémon tend to be faster.\n\nThe data shows that many of the fastest Pokémon are relatively lightweight, although there are exceptions. Extremely heavy Pokémon are rarely among the fastest, which aligns with intuitive expectations about mobility.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#differences-between-pokémon-types",
+    "href": "projects/data-acquisition.html#differences-between-pokémon-types",
+    "title": "Data Acquisition Project",
+    "section": "Differences Between Pokémon Types",
+    "text": "Differences Between Pokémon Types\nPokémon types show some of the most interesting patterns in battle statistics.\n\nAverage Attack by Type\n\nFighting, dragon, and ground types tend to have the highest average attack stats, while psychic and fairy types tend to have lower physical attack.\nThis reflects common gameplay roles: fighting types are often designed as strong physical attackers.\n\n\n\nAverage Speed by Type\n\nElectric, flying, and dragon types tend to have the highest average speed, while rock and steel types are generally slower.\nThis aligns with intuitive design ideas: heavy rock or steel Pokémon often trade mobility for durability.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#the-strongest-pokémon-overall",
+    "href": "projects/data-acquisition.html#the-strongest-pokémon-overall",
+    "title": "Data Acquisition Project",
+    "section": "The Strongest Pokémon Overall",
+    "text": "The Strongest Pokémon Overall\nOne way to measure overall strength is to sum all battle stats.\n\nThe Pokémon with the highest total stats are mostly legendary Pokémon, such as Arceus, Eternatus, and Rayquaza.\nThis is expected, since legendary Pokémon are intentionally designed to be among the strongest in the game.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#key-insights",
+    "href": "projects/data-acquisition.html#key-insights",
+    "title": "Data Acquisition Project",
+    "section": "Key Insights",
+    "text": "Key Insights\nSeveral patterns emerge from this dataset:\n\nBattle stats tend to be moderately correlated, but no stat strongly determines another.\nLarger Pokémon are not necessarily stronger attackers.\nFaster Pokémon tend to be lighter and more agile types.\nCertain types specialize in particular stats:\n\nFighting and dragon types often have high attack\nElectric and flying types tend to be faster\nRock and steel types are slower but often defensive\n\nLegendary Pokémon dominate the highest total stat rankings.\n\nThese patterns suggest that Pokémon design encourages a variety of battle roles rather than a single dominant strategy.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#limitations",
+    "href": "projects/data-acquisition.html#limitations",
+    "title": "Data Acquisition Project",
+    "section": "Limitations",
+    "text": "Limitations\nWhile the dataset provides useful insights, there are several limitations:\n\nOnly the primary type was used, even though many Pokémon have two types.\nBase stats do not capture all battle mechanics such as abilities, moves, or type advantages.\nPokémon evolutions and alternate forms may affect stat distributions.\n\nFuture analysis could incorporate move sets, abilities, or type effectiveness.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#conclusion",
+    "href": "projects/data-acquisition.html#conclusion",
+    "title": "Data Acquisition Project",
+    "section": "Conclusion",
+    "text": "Conclusion\nThis project demonstrates how publicly available APIs can be used to build interesting datasets for exploratory analysis. By collecting and analyzing Pokémon battle statistics, we were able to identify patterns in stat relationships, type differences, and overall strength.\nBeyond Pokémon, the same workflow—using APIs, cleaning JSON data, and exploring relationships—can be applied to many real-world datasets.\nFor students learning data science, projects like this provide a fun way to practice data acquisition, cleaning, and visualization while exploring patterns in complex systems.",
+    "crumbs": [
+      "Data Acquisition Project"
+    ]
+  },
+  {
+    "objectID": "projects/data-acquisition.html#resources",
+    "href": "projects/data-acquisition.html#resources",
+    "title": "Data Acquisition Project",
+    "section": "Resources",
+    "text": "Resources\nPokéAPI\nhttps://pokeapi.co/\nProject GitHub Repository\nhttps://github.com/dallinmj/pokemon",
     "crumbs": [
       "Data Acquisition Project"
     ]
